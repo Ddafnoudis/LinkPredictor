@@ -1,3 +1,4 @@
+import pickle
 from typing import List, Tuple
 
 
@@ -21,3 +22,12 @@ class ResultsGNN:
 
     def set_validation_loss_history(self, history: List[float]):
         self.validation_loss_history = history
+
+    def save_loss_history(self, output_file: str):
+        # combine loss histories
+        loss_dict = {
+            'training': self.loss_history,
+            'validation': self.validation_loss_history,
+        }
+        with open(output_file, 'wb') as f:
+            pickle.dump(loss_dict, f)

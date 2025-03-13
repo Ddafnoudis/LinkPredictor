@@ -23,7 +23,10 @@ def main():
                       edge_type=my_edge_type(),
                       epochs=500,
                       itta=0.0001)
-    
+
+    # save to files
+    results.save_loss_history(output_file=config['output_dir'] / 'loss_histories.pkl')
+
     # plotting
     plot = Plot()
     plot.loss_history(data=results)

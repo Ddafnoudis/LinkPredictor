@@ -7,8 +7,9 @@ class Plot:
         self.figsize = (12, 8)
         self.title_size = 18
         self.label_size = 16
+        self.dpi = 800
     
-    def loss_history(self, data: ResultsGNN):
+    def loss_history(self, data: ResultsGNN, outfile: str = None):
         plt.figure(figsize=self.figsize)
 
         plt.plot(data.n_epochs, data.loss_history, color='blue', label='training')
@@ -23,4 +24,8 @@ class Plot:
         plt.gca().spines['left'].set_visible(False)
         plt.gca().spines['right'].set_visible(False)
 
-        plt.show()
+        if outfile:
+            plt.savefig(outfile, dpi=self.dpi)
+            plt.close()
+        else:
+            plt.show()
