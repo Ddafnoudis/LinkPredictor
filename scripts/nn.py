@@ -5,7 +5,7 @@ from torch_geometric.nn import GAT, to_hetero
 from torch_geometric.transforms import RandomLinkSplit
 
 from scripts import EdgeType, ResultsGNN
-
+from scripts.loss_function import WeightedBinaryCrossEntropy
 
 class EarlyStop:
     def __init__(self,  patience: int = 10, delta: float = 0.0001):
@@ -102,7 +102,7 @@ def run_gnn(
         train_graph=train_data,
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=itta)
-    criterion = torch.nn.BCELoss()
+    criterion = WeightedBinaryCrossEntropy()
     early_stop = EarlyStop()
 
     # place data to device
