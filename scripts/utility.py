@@ -24,7 +24,12 @@ class Utility:
 
         #
         contents['output_dir'] = Path(contents['output_dir'])
-        if not contents['output_dir'].exists():
-            contents['output_dir'].mkdir(exist_ok=True, parents=True)
+        contents['plot_dir'] = contents['output_dir'] / 'plots/'
+        contents['emb_dir'] = contents['output_dir'] / 'embeddings/'
+        #
+        if not contents['plot_dir'].exists():
+            contents['plot_dir'].mkdir(exist_ok=True, parents=True)
+        if not contents['emb_dir'].exists():
+            contents['emb_dir'].mkdir(exist_ok=True, parents=True)
 
         return contents

@@ -21,15 +21,20 @@ def main():
 
     results = run_gnn(graph=kg.graph(),
                       edge_type=my_edge_type(),
-                      epochs=500,
-                      itta=0.0001)
+                      epochs=config['epochs'],
+                      itta=config['learning_rate'])
 
     # save to files
     results.save_loss_history(output_file=config['output_dir'] / 'loss_histories.pkl')
+    results.save_embeddings(
+        training_outfile=config['emb_dir'] / 'training.pkl',
+        validation_outfile=config['emb_dir'] / 'validation.pkl',
+        test_outfile=config['emb_dir'] / 'test.pkl',
+    )
 
     # plotting
     plot = Plot()
-    plot.loss_history(data=results)
+    plot.loss_history(data=results, outfile=config['plot_dir'] / 'loss_history.png')
 
 
 

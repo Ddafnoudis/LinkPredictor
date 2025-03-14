@@ -4,8 +4,10 @@ from torch_geometric.data import HeteroData
 from torch_geometric.nn import GAT, to_hetero
 from torch_geometric.transforms import RandomLinkSplit
 
-from scripts import EdgeType, ResultsGNN
+from typing import Tuple
+from scripts import EdgeType, ResultsGNN, EmbeddingSpace
 from scripts.loss_function import WeightedBinaryCrossEntropy
+
 
 class EarlyStop:
     def __init__(self,  patience: int = 10, delta: float = 0.0001):
@@ -58,7 +60,12 @@ class LinkPredictor(torch.nn.Module):
             out_features=1,
         )
 
-    def forward(self, graph: HeteroData) -> torch.Tensor:
+    def forward(self, graph: HeteroData) -> Tuple[torch.Tensor, EmbeddingSpace]:
+        """
+        Takes as input a graph and embeds the nodes.
+        :param graph: a HeteroData object representing a graph
+        :return: a tuple containing the results of prediction and the embedding space itself.
+        """
         # generate node embeddings
         embeddings = self.encoder(
             x=graph.x_dict,
@@ -74,7 +81,7 @@ class LinkPredictor(torch.nn.Module):
         )
         edge_predictions = self.classifier(edge_predictions)
 
-        return torch.sigmoid(edge_predictions).view(-1)
+        return torch.sigmoid(edge_predictions).view(-1), EmbeddingSpace(embed_dict=embeddings)
 
 
 def run_gnn(
@@ -116,7 +123,7 @@ def run_gnn(
         model.train()
         optimizer.zero_grad()
 
-        y_hat = model(graph=train_data)
+        y_hat, emb_space_train = model(graph=train_data)
         loss = criterion(y_hat, train_data[edge_type].edge_label)
         loss_history.append(loss.item())
         early_stop(metric=loss.item())
@@ -127,7 +134,7 @@ def run_gnn(
         # model validation
         with torch.no_grad():
             model.eval()
-            validation_y = model(graph=val_data)
+            validation_y, emb_space_val = model(graph=val_data)
             validation_loss = criterion(validation_y, val_data[edge_type].edge_label)
             val_loss_history.append(validation_loss.item())
 
@@ -137,14 +144,14 @@ def run_gnn(
     # test-set results
     with torch.no_grad():
         model.eval()
-        y_test = model(graph=test_data)
-
-        print(y_test)
-        print(test_data[edge_type].edge_label)
+        y_test, emb_space_test = model(graph=test_data)
 
     # results object
     results = ResultsGNN()
     results.set_loss_history(history=loss_history)
+    results.set_training_embeds(embs=emb_space_train)
+    results.set_validation_embeds(embs=emb_space_val)
+    results.set_test_embeds(embs=emb_space_test)
     results.set_validation_loss_history(history=val_loss_history)
 
     return results
