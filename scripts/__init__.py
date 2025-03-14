@@ -19,8 +19,8 @@ class EmbeddingSpace:
     def node_types(self) -> List[str]:
         return self.node_types
 
-    def __call__(self) -> Dict[str, torch.Tensor]:
-        return self.embedding_dictionary
+    def __call__(self, node_type: str) -> torch.Tensor:
+        return self.embedding_dictionary[node_type].detach()
 
 
 class ResultsGNN:

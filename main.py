@@ -35,7 +35,7 @@ def main():
     # plotting
     plot = Plot()
     plot.loss_history(data=results, outfile=config['plot_dir'] / 'loss_history.png')
-
+    plot.embedding_space(data=results, outfile=config['plot_dir'] / 'embeddings.png')
 
 
 if __name__ == '__main__':
