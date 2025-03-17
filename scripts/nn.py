@@ -34,12 +34,11 @@ class LinkPredictor(torch.nn.Module):
             self,
             edge_type: EdgeType,
             train_graph: HeteroData,
-            dropout: float = 0.5,
             depth: int = 3
     ):
         super().__init__()
         # get edge type and size of input features
-        self.edge_type = edge_type
+        self.edge_type = edge_type()
         in_features = train_graph[edge_type[0]].x.size(1)
 
         # initialize GNN encoder
@@ -99,7 +98,7 @@ def run_gnn(
         num_test=0.1,
         is_undirected=True,
         neg_sampling_ratio=2.0,
-        edge_types=[edge_type]
+        edge_types=[edge_type()]
     )
     train_data, val_data, test_data = transform(graph)
 
@@ -117,6 +116,9 @@ def run_gnn(
     test_data.to(device=device)
     val_data.to(device=device)
     model.to(device=device)
+
+    # init emb spaces
+    emb_space_train, emb_space_val, emb_space_test = None, None, None
 
     loss_history, val_loss_history = [], []
     for _ in tqdm.tqdm(range(epochs), desc='Epoch'):

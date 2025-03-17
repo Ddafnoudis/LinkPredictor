@@ -10,6 +10,9 @@ class EdgeType:
     def __call__(self) -> Tuple[str, str, str]:
         return self.edge_type
 
+    def __getitem__(self, item: int) -> str:
+        return self.edge_type[item]
+
 
 class EmbeddingSpace:
     def __init__(self, embed_dict: Dict[str, torch.Tensor]):

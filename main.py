@@ -20,7 +20,7 @@ def main():
     kg.parse_file(fname=config['knowledge_graph'])
 
     results = run_gnn(graph=kg.graph(),
-                      edge_type=my_edge_type(),
+                      edge_type=my_edge_type,
                       epochs=config['epochs'],
                       itta=config['learning_rate'])
 
