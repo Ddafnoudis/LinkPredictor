@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import pandas as pd
+import networkx as nx
 from collections import defaultdict
 
 from torch_geometric.data import HeteroData
@@ -68,6 +69,9 @@ class KnowledgeGraph:
         Create heterogeneous graph object from `torch_geometric.data.HeteroData`
         :return: `Heterodata` object representation of the knowledge graph
         """
+        # get features for the nodes in the graph
+        # TODO: Add the node features from `get_node_features`
+
         # initialize empty heterogeneous graph
         my_graph = HeteroData()
 
@@ -95,3 +99,18 @@ class KnowledgeGraph:
             my_graph[edge_type].edge_index = torch.from_numpy(edge_array).to(torch.int64)
 
         return ToUndirected()(my_graph)
+
+    def get_node_features(self):
+        # generate the edge_list
+        edge_list = []
+        for my_edge_list in self.edges.values():
+            for my_edge in my_edge_list:
+                edge_list.append(my_edge)
+        edge_list = edge_list[:1000]
+        # generate networkx graph
+        my_graph = nx.Graph()
+        my_graph.add_edges_from(edge_list)
+
+        # get Jaccard similarity score
+        jaccard_scores = list(nx.jaccard_coefficient(my_graph))
+        print(len(jaccard_scores))
