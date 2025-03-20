@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import torch
+import streamlit as st
 from scripts import ResultsGNN, EmbeddingSpace
 from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
@@ -15,7 +16,7 @@ class Plot:
         self.dpi = 800
     
     def loss_history(self, data: ResultsGNN, outfile: str = None):
-        plt.figure(figsize=self.figsize)
+        fig = plt.figure(figsize=self.figsize)
 
         plt.plot(data.n_epochs, data.loss_history, color='blue', label='training')
         plt.plot(data.n_epochs, data.validation_loss_history, color='red', label='validation')
@@ -29,7 +30,9 @@ class Plot:
         plt.gca().spines['left'].set_visible(False)
         plt.gca().spines['right'].set_visible(False)
 
-        if outfile:
+        if outfile == 'streamlit':
+            st.pyplot(fig)
+        elif outfile:
             plt.savefig(outfile, dpi=self.dpi)
             plt.close()
         else:

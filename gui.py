@@ -1,7 +1,7 @@
 import streamlit as st
-from scripts import EdgeType
 from scripts.nn import run_gnn
 from scripts.data import KnowledgeGraph
+from scripts import EdgeType, ResultsGNN
 from scripts.params_gui import ParametersGUI
 
 
@@ -38,13 +38,13 @@ def main():
         # check for submission
         submitted = st.form_submit_button('Run')
     if submitted:
-        run(p=params)
+        st.session_state.gnn_results = run(p=params)
 
     # sidebar
     st.sidebar.success('This is a demo.')
 
 
-def run(p: ParametersGUI):
+def run(p: ParametersGUI) -> ResultsGNN:
     """
     """
     st.write(f'Epochs: {p.form_epochs}')
@@ -61,6 +61,8 @@ def run(p: ParametersGUI):
                       edge_type=my_edge_type,
                       epochs=p.form_epochs,
                       itta=p.form_lr)
+
+    return results
 
 
 if __name__ == '__main__':
