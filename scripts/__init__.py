@@ -13,6 +13,9 @@ class EdgeType:
     def __getitem__(self, item: int) -> str:
         return self.edge_type[item]
 
+    def __len__(self) -> int:
+        return len(self.edge_type)
+
 
 class EmbeddingSpace:
     def __init__(self, embed_dict: Dict[str, torch.Tensor]):
