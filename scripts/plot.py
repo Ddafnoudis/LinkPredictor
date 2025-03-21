@@ -6,6 +6,7 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 from typing import Dict
 import warnings
+import numpy as np
 
 
 class Plot:
@@ -72,11 +73,11 @@ class Plot:
                     tensor_tup = (my_tensor, tmp_tensor)
                     my_tensor = torch.cat(tensor_tup, dim=0)
             # apply a t-sne dimensionality reduction
-            tsne_res = my_tsne(x=my_tensor)
+            tsne_res = my_tsne(x=my_tensor.detach().cpu())
 
             # split again after t-sne
             for i in range(1, len(nt_order)):
-                results[nt_order[i]] = my_tensor[nt_sizes[nt_order[i-1]]:nt_sizes[nt_order[i]], :]
+                results[nt_order[i]] = tsne_res[nt_sizes[nt_order[i-1]]:nt_sizes[nt_order[i]], :]
 
             return results
 
@@ -98,7 +99,7 @@ class Plot:
         #
         if data.training_embedding_space:
             for i, (node_type, dims) in enumerate(training_data.items()):
-                axes[0].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='b', label=node_type)
+                axes[0].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='black', label=node_type)
             axes[0].set_title('Training set')
             axes[0].set_xlabel('dim 1')
             axes[0].set_ylabel('dim 2')
@@ -106,7 +107,7 @@ class Plot:
 
         if data.validation_embedding_space:
             for i, (node_type, dims) in enumerate(validation_data.items()):
-                axes[1].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='b', label=node_type)
+                axes[1].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='black', label=node_type)
             axes[1].set_title('Validation set')
             axes[1].set_xlabel('dim 1')
             axes[1].set_ylabel('dim 2')
@@ -114,11 +115,13 @@ class Plot:
 
         if data.test_embedding_space:
             for i, (node_type, dims) in enumerate(test_data.items()):
-                axes[2].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='b', label=node_type)
+                axes[2].scatter(dims[:, 0], dims[:, 1], color=my_colors[i], edgecolors='black', label=node_type)
             axes[2].set_title('Test set')
             axes[2].set_xlabel('dim 1')
             axes[2].set_ylabel('dim 2')
             axes[2].legend()
+
+        plt.tight_layout()
 
         if outfile:
             plt.savefig(outfile, dpi=self.dpi)
@@ -127,7 +130,7 @@ class Plot:
             plt.show()
 
 
-def my_tsne(x: torch.Tensor) -> torch.Tensor:
+def my_tsne(x: torch.Tensor) -> np.array:
     """
     Performs t-sne to reduce the dimensionality of input `x` to 2D.
     :param x: NxF torch tensor, N is the number of samples, F is the number of features
@@ -138,7 +141,12 @@ def my_tsne(x: torch.Tensor) -> torch.Tensor:
     x_scaled = scaler.fit_transform(x)
 
     # Apply t-SNE for dimensionality reduction to 2D
-    tsne = TSNE(n_components=2, perplexity=30, random_state=71)
+    tsne = TSNE(
+        n_components=2,
+        perplexity=10, # move to 30, higher is better but takes longer
+        n_iter=250, # move to 1_000
+        random_state=71
+    )
     x_embedded = tsne.fit_transform(x_scaled)
 
     return x_embedded
