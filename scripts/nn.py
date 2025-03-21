@@ -126,7 +126,7 @@ def run_gnn(
         optimizer.zero_grad()
 
         y_hat, emb_space_train = model(graph=train_data)
-        loss = criterion(y_hat, train_data[edge_type].edge_label)
+        loss = criterion(y_hat, train_data[edge_type()].edge_label)
         loss_history.append(loss.item())
         early_stop(metric=loss.item())
 
@@ -137,7 +137,7 @@ def run_gnn(
         with torch.no_grad():
             model.eval()
             validation_y, emb_space_val = model(graph=val_data)
-            validation_loss = criterion(validation_y, val_data[edge_type].edge_label)
+            validation_loss = criterion(validation_y, val_data[edge_type()].edge_label)
             val_loss_history.append(validation_loss.item())
 
         if early_stop.early_stop:
