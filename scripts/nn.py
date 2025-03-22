@@ -34,9 +34,14 @@ class LinkPredictor(torch.nn.Module):
             self,
             edge_type: EdgeType,
             train_graph: HeteroData,
-            depth: int = 3
+            classifier_type: str,
+            depth: int = 3,
     ):
         super().__init__()
+        # make sure that classfier type is within selection
+        classifier_types = ['linear', 'similarity']
+        assert(classifier_type in classifier_types)
+
         # get edge type and size of input features
         self.edge_type = edge_type()
         in_features = train_graph[edge_type[0]].x.size(1)
@@ -54,10 +59,14 @@ class LinkPredictor(torch.nn.Module):
         self.encoder = to_hetero(my_model, metadata=train_graph.metadata())
 
         # linear classifier
+        self.classification_type = classifier_type
+
         self.classifier = torch.nn.Linear(
             in_features=32,
             out_features=1,
         )
+
+
 
     def forward(self, graph: HeteroData) -> Tuple[torch.Tensor, EmbeddingSpace]:
         """
@@ -74,20 +83,28 @@ class LinkPredictor(torch.nn.Module):
         # source and destination nodes
         src = graph[self.edge_type].edge_label_index[0]
         dst = graph[self.edge_type].edge_label_index[1]
-        edge_predictions = torch.cat(
-                tensors=[embeddings[self.edge_type[0]][src], embeddings[self.edge_type[2]][dst]],
-                dim=-1
-        )
-        edge_predictions = self.classifier(edge_predictions)
+        if self.classification_type == 'linear':
+            # linear layer
+            edge_predictions = torch.cat(
+                    tensors=[embeddings[self.edge_type[0]][src], embeddings[self.edge_type[2]][dst]],
+                    dim=-1
+            )
+            edge_predictions = self.classifier(edge_predictions)
 
-        return torch.sigmoid(edge_predictions).view(-1), EmbeddingSpace(embed_dict=embeddings)
+            predictions = torch.sigmoid(edge_predictions).view(-1)
+        else:
+            # similarity score
+            predictions = (embeddings[self.edge_type[0]][src] @ embeddings[self.edge_type[2]][dst].T).sum(dim=-1)
+
+        return predictions, EmbeddingSpace(embed_dict=embeddings)
 
 
 def run_gnn(
         graph: HeteroData, 
         edge_type: EdgeType, 
         epochs: int = 5, 
-        itta: float = 0.01
+        itta: float = 0.01,
+        classification_type: str = 'linear',
         ) -> ResultsGNN:
     # get running device 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -106,6 +123,7 @@ def run_gnn(
     model = LinkPredictor(
         edge_type=edge_type,
         train_graph=train_data,
+        classifier_type=classification_type
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=itta)
     criterion = WeightedBinaryCrossEntropy()

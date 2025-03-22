@@ -23,7 +23,8 @@ def main():
     results = run_gnn(graph=kg.graph(),
                       edge_type=my_edge_type,
                       epochs=config['epochs'],
-                      itta=config['learning_rate'])
+                      itta=config['learning_rate'],
+                      classification_type=config['classifier'])
 
     # annotate & save results
     results.annotate_results(kg=kg)
