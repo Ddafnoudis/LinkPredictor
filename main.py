@@ -15,14 +15,19 @@ def main():
     # edge of interest
     my_edge_type = EdgeType(src='disease', rel='off_label_use', dst='drug')
 
-    #
+    # generate graph
     kg = KnowledgeGraph()
     kg.parse_file(fname=config['knowledge_graph'])
 
+    # initialize GNN
     results = run_gnn(graph=kg.graph(),
                       edge_type=my_edge_type,
                       epochs=config['epochs'],
                       itta=config['learning_rate'])
+
+    # annotate & save results
+    results.annotate_results(kg=kg)
+    results.save_results(output_file=config['output_dir'] / 'predictions.tsv')
 
     # save to files
     results.save_loss_history(output_file=config['output_dir'] / 'loss_histories.pkl')
@@ -32,6 +37,7 @@ def main():
         test_outfile=config['emb_dir'] / 'test.pkl',
     )
 
+    exit()
     # plotting
     plot = Plot()
     plot.loss_history(data=results, outfile=config['plot_dir'] / 'loss_history.png')

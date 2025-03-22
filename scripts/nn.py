@@ -149,7 +149,16 @@ def run_gnn(
         y_test, emb_space_test = model(graph=test_data)
 
     # results object
-    results = ResultsGNN()
+    results = ResultsGNN(edge_type=edge_type)
+    results.set_test_results(r=y_test,
+                             edge_label_index=test_data[edge_type()].edge_label_index,
+                             edge_label=test_data[edge_type()].edge_label)
+    results.set_val_results(r=validation_y,
+                            edge_label_index=val_data[edge_type()].edge_label_index,
+                            edge_label=val_data[edge_type()].edge_label)
+    results.set_training_results(r=y_hat,
+                                 edge_label_index=train_data[edge_type()].edge_label_index,
+                                 edge_label=train_data[edge_type()].edge_label)
     results.set_loss_history(history=loss_history)
     results.set_training_embeds(embs=emb_space_train)
     results.set_validation_embeds(embs=emb_space_val)
