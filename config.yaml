@@ -1,5 +1,8 @@
 # input file
-knowledge_graph: '~/Desktop/datasets/primekg/kg.csv'
+knowledge_graph: 'datasets/primekg/kg.csv'
+
+# Subset file
+subset_file: 'datasets/primekg/subset_kg.csv'
 
 # GNN parameters
 epochs: 2
