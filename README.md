@@ -10,7 +10,7 @@ This project attempts to implement graph machine learning algorithms to perform 
 Create a virtual environment and install the following packages
 
 ```bash
-conda create -n <env_name> python=3.10.16
+conda create -n <env_name> python==3.10.16
 conda activate env_name
 ```
 
