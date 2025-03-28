@@ -1,16 +1,29 @@
+import os
 from scripts import EdgeType
 from scripts.plot import Plot
 from scripts.nn import run_gnn
 from scripts.utility import Utility
 from scripts.data import KnowledgeGraph
+from scripts.subset_data import SubsetData
 
 CONFIG_FILE = 'config.yaml'
+
+
 
 
 def main():
     # generate class instances
     my_utility = Utility()
     config = my_utility.parse_config(fname=CONFIG_FILE)
+
+    
+    # Initialize the SubsetData class
+    subset_data = SubsetData(fname=config['knowledge_graph'], outfile=config["subset_file"])
+    # Get the subset DataFrame
+    subset_df = subset_data.get_subset_dataframe()
+    # Print the first 5 rows of the DataFrame
+    print(f"Unique elements after: {len(subset_df['relation'].unique())}")
+    # exit()
 
     # edge of interest
     my_edge_type = EdgeType(src='disease', rel='off_label_use', dst='drug')
