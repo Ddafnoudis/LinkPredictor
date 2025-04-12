@@ -40,7 +40,7 @@ class SubsetData:
 
     def subset_data(self):
         """
-        Subset the data by relation column, ensuring unique x_name values.
+        Subset the data by relation column (unique x_names)
         """
         self.subset_df = pd.DataFrame()
 
@@ -69,8 +69,5 @@ class SubsetData:
     def get_subset_dataframe(self) -> DataFrame:
         """
         Returns the subset DataFrame containing 100 unique genes per class.
-
-        Returns:
-            DataFrame: The subset DataFrame with unique x_name values (if possible).
         """
         return self.subset_df
